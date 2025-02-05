@@ -79,6 +79,13 @@
             <version>3.4.1</version>
         </dependency>
 
+        <!-- add Spring Web -->
+        <!-- https://mvnrepository.com/artifact/org.springframework/spring-web -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>6.2.1</version>
+        </dependency>
 
 
 

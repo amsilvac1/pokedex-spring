@@ -1,3 +1,4 @@
+/*
 package ec.edu.uce.pokedex.swing;
 
 import ec.edu.uce.pokedex.entities.Pokemon;
@@ -37,9 +38,11 @@ public class PokedexGUI extends JFrame {
         });
     }
 
-    /**
+    */
+/**
      * Create the frame.
-     */
+     *//*
+
     public PokedexGUI(PokemonService pokemonService, double timeData) {
         setTitle("POKEDEX");
         this.pokemonService = pokemonService;
@@ -326,3 +329,4 @@ public class PokedexGUI extends JFrame {
         }
     }
 }
+*/
