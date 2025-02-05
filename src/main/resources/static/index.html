@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex Avanzada</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <div class="pokedex">
+        <div class="pokedex-lights">
+            <div class="light light-main"></div>
+            <div class="light light-red"></div>
+            <div class="light light-yellow"></div>
+            <div class="light light-green"></div>
+        </div>
+
+        <h1>Pokédex</h1>
+
+        <div class="search-filters">
+            <select id="searchType" class="search-select">
+                <option value="name">Buscar por Nombre</option>
+                <option value="ability">Buscar por Habilidad</option>
+                <option value="type">Buscar por Tipo</option>
+            </select>
+
+            <div class="sort-controls">
+                <button id="sortAsc" class="sort-button">
+                    ↑ A-Z
+                </button>
+                <button id="sortDesc" class="sort-button">
+                    ↓ Z-A
+                </button>
+            </div>
+        </div>
+
+        <form id="searchForm" class="search-form">
+            <div class="search-container">
+                <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Buscar..."
+                        class="search-input"
+                        autocomplete="off"
+                >
+                <button type="submit" class="search-button">Buscar</button>
+            </div>
+        </form>
+
+        <div class="main-content">
+            <div class="pokemon-list-container">
+                <div id="pokemonList" class="pokemon-list">
+                    <!-- La lista de Pokémon se generará aquí -->
+                </div>
+            </div>
+
+            <div class="pokemon-details">
+                <div id="loadingSpinner" class="loading-spinner hidden">
+                    <div class="pokeball-spinner"></div>
+                </div>
+
+                <div id="pokemonCard" class="pokemon-card hidden">
+                    <div class="card-header">
+                        <h2 id="pokemonName" class="pokemon-name"></h2>
+                        <span id="pokemonId" class="pokemon-id"></span>
+                    </div>
+
+                    <div class="pokemon-main-content">
+                        <div class="pokemon-image-container">
+                            <div class="image-frame">
+                                <img id="pokemonImage" class="pokemon-image" src="" alt="">
+                            </div>
+                        </div>
+
+                        <div class="pokemon-info">
+                            <div id="pokemonTypes" class="pokemon-types"></div>
+
+                            <div class="pokemon-stats">
+                                <div class="stat-box">
+                                    <p class="stat-label">Altura</p>
+                                    <p id="pokemonHeight" class="stat-value"></p>
+                                </div>
+                                <div class="stat-box">
+                                    <p class="stat-label">Peso</p>
+                                    <p id="pokemonWeight" class="stat-value"></p>
+                                </div>
+                            </div>
+
+                            <div class="pokemon-abilities">
+                                <h3>Habilidades</h3>
+                                <div id="abilitiesList" class="abilities-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="errorMessage" class="error-message hidden">
+                    Pokémon no encontrado. Intenta con otro nombre.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
