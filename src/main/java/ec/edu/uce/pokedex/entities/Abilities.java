@@ -1,6 +1,8 @@
 package ec.edu.uce.pokedex.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +20,5 @@ public class Abilities {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column private String name;
-
 
 }

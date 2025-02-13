@@ -17,6 +17,8 @@ public interface PokemonRepository extends JpaRepository<Pokemon, Long> {
 
     // Buscar Pokémon por tipo
     List<Pokemon> findByTypes_Name(String typeName);
+
+
 }
 
 

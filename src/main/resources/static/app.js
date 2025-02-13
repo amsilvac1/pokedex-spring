@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const searchForm = document.getElementById('searchForm');
     const searchInput = document.getElementById('searchInput');
     const searchType = document.getElementById('searchType');
@@ -12,21 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let allPokemon = [];
     let currentSort = 'asc';
 
-    // Función para cargar la lista inicial de Pokémon
     async function loadInitialPokemon() {
         try {
             showLoading();
-            const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=151');
-            const data = await response.json();
-            allPokemon = await Promise.all(
-                data.results.map(async (pokemon) => {
-                    const detailResponse = await fetch(pokemon.url);
-                    return detailResponse.json();
-                })
-            );
-            sortAndDisplayPokemon();
+            const response = await fetch('http://localhost:8080/api/pokemon');
+            allPokemon = await response.json();
             hideLoading();
-            // Cargar el primer Pokémon por defecto
+            sortAndDisplayPokemon();
+
             if (allPokemon.length > 0) {
                 displayPokemon(allPokemon[0]);
             }
@@ -35,58 +28,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para ordenar y mostrar la lista de Pokémon
+    await loadInitialPokemon();
+
     function sortAndDisplayPokemon(filterText = '') {
+        if (!allPokemon.length) return;
         let filteredPokemon = [...allPokemon];
 
-        // Aplicar filtro según el tipo de búsqueda
         if (filterText) {
             filterText = filterText.toLowerCase();
             switch (searchType.value) {
                 case 'name':
-                    filteredPokemon = filteredPokemon.filter(p =>
-                        p.name.toLowerCase().includes(filterText)
-                    );
+                    filteredPokemon = filteredPokemon.filter(p => p.name.toLowerCase().startsWith(filterText));
                     break;
                 case 'ability':
-                    filteredPokemon = filteredPokemon.filter(p =>
-                        p.abilities.some(a =>
-                            a.ability.name.toLowerCase().includes(filterText)
-                        )
-                    );
+                    filteredPokemon = filteredPokemon.filter(p => p.abilities.some(a => (a.name || a).toLowerCase().includes(filterText)));
                     break;
                 case 'type':
-                    filteredPokemon = filteredPokemon.filter(p =>
-                        p.types.some(t =>
-                            t.type.name.toLowerCase().includes(filterText)
-                        )
-                    );
+                    filteredPokemon = filteredPokemon.filter(p => p.types.some(t => (t.name || t).toLowerCase().includes(filterText)));
                     break;
             }
         }
 
-        // Ordenar la lista
-        filteredPokemon.sort((a, b) => {
-            if (currentSort === 'asc') {
-                return a.name.localeCompare(b.name);
-            } else {
-                return b.name.localeCompare(a.name);
-            }
-        });
+        filteredPokemon.sort((a, b) => currentSort === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
 
-        // Mostrar la lista en el DOM
         pokemonList.innerHTML = '';
         filteredPokemon.forEach(pokemon => {
             const listItem = document.createElement('div');
             listItem.className = 'pokemon-list-item';
-            listItem.innerHTML = `
-                <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}">
-                <span>${pokemon.name}</span>
-            `;
+            listItem.innerHTML = `<span>${pokemon.name}</span>`;
             listItem.addEventListener('click', () => {
-                document.querySelectorAll('.pokemon-list-item').forEach(item => {
-                    item.classList.remove('active');
-                });
+                document.querySelectorAll('.pokemon-list-item').forEach(item => item.classList.remove('active'));
                 listItem.classList.add('active');
                 displayPokemon(pokemon);
             });
@@ -94,24 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Función para buscar un Pokémon específico
-    async function searchPokemon(name) {
-        try {
-            showLoading();
-            const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`);
-
-            if (!response.ok) {
-                throw new Error('Pokemon not found');
-            }
-
-            const data = await response.json();
-            displayPokemon(data);
-        } catch (error) {
-            showError();
-        }
-    }
-
-    // Función para mostrar el Pokémon
     function displayPokemon(pokemon) {
         errorMessage.classList.add('hidden');
         pokemonCard.classList.remove('hidden');
@@ -119,80 +72,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('pokemonName').textContent = pokemon.name;
         document.getElementById('pokemonId').textContent = `#${String(pokemon.id).padStart(3, '0')}`;
-
-        const typesContainer = document.getElementById('pokemonTypes');
-        typesContainer.innerHTML = '';
-        pokemon.types.forEach(type => {
-            const typeElement = document.createElement('span');
-            typeElement.className = 'type-badge';
-            typeElement.textContent = type.type.name;
-            typeElement.style.backgroundColor = getTypeColor(type.type.name);
-            typesContainer.appendChild(typeElement);
-        });
-
-        const pokemonImage = document.getElementById('pokemonImage');
-        pokemonImage.src = pokemon.sprites.other['official-artwork'].front_default;
-        pokemonImage.alt = pokemon.name;
-
         document.getElementById('pokemonHeight').textContent = `${pokemon.height / 10}m`;
         document.getElementById('pokemonWeight').textContent = `${pokemon.weight / 10}kg`;
 
+        // 🟢 Mostrar correctamente la imagen del Pokémon
+        const pokemonImage = document.getElementById('pokemonImage');
+        if (pokemon.imageUrl) {
+            pokemonImage.src = pokemon.imageUrl;
+        } else if (pokemon.image) {
+            pokemonImage.src = pokemon.image;
+        } else {
+            pokemonImage.src = 'default-image.png'; // Imagen por defecto si no hay imagen disponible
+        }
+        pokemonImage.alt = pokemon.name;
+
+
+        const typesContainer = document.getElementById('pokemonTypes');
+        typesContainer.innerHTML = '';
+        pokemon.types.forEach(typeObj => {
+            const typeName = typeObj.name || typeObj;
+            const typeElement = document.createElement('span');
+            typeElement.className = 'type-badge';
+            typeElement.textContent = typeName;
+            typeElement.style.backgroundColor = getTypeColor(typeName);
+            typesContainer.appendChild(typeElement);
+        });
+
+
         const abilitiesList = document.getElementById('abilitiesList');
         abilitiesList.innerHTML = '';
-        pokemon.abilities.forEach(ability => {
+        pokemon.abilities.forEach(abilityObj => {
+            const abilityName = abilityObj.name || abilityObj;
             const abilityElement = document.createElement('span');
             abilityElement.className = 'ability-badge';
-            abilityElement.textContent = ability.ability.name;
+            abilityElement.textContent = abilityName;
             abilitiesList.appendChild(abilityElement);
         });
     }
 
-    // Función para mostrar el loading
+
     function showLoading() {
         loadingSpinner.classList.remove('hidden');
         pokemonCard.classList.add('hidden');
         errorMessage.classList.add('hidden');
     }
 
-    // Función para mostrar error
+    function hideLoading() {
+        loadingSpinner.classList.add('hidden');
+    }
+
     function showError() {
         errorMessage.classList.remove('hidden');
         pokemonCard.classList.add('hidden');
         loadingSpinner.classList.add('hidden');
     }
 
-    // Función para obtener el color según el tipo de Pokémon
     function getTypeColor(type) {
         const colors = {
-            normal: '#A8A878',
-            fire: '#F08030',
-            water: '#6890F0',
-            electric: '#F8D030',
-            grass: '#78C850',
-            ice: '#98D8D8',
-            fighting: '#C03028',
-            poison: '#A040A0',
-            ground: '#E0C068',
-            flying: '#A890F0',
-            psychic: '#F85888',
-            bug: '#A8B820',
-            rock: '#B8A038',
-            ghost: '#705898',
-            dragon: '#7038F8',
-            dark: '#705848',
-            steel: '#B8B8D0',
-            fairy: '#EE99AC'
+            normal: '#A8A878', fire: '#F08030', water: '#6890F0', electric: '#F8D030', grass: '#78C850',
+            ice: '#98D8D8', fighting: '#C03028', poison: '#A040A0', ground: '#E0C068', flying: '#A890F0',
+            psychic: '#F85888', bug: '#A8B820', rock: '#B8A038', ghost: '#705898', dragon: '#7038F8',
+            dark: '#705848', steel: '#B8B8D0', fairy: '#EE99AC'
         };
         return colors[type] || '#777777';
     }
 
-    // Event listeners
     searchForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const searchTerm = searchInput.value.trim();
-        if (searchTerm) {
-            sortAndDisplayPokemon(searchTerm);
-        }
+        sortAndDisplayPokemon(searchInput.value.trim());
     });
 
     searchInput.addEventListener('input', (e) => {
@@ -214,6 +161,4 @@ document.addEventListener('DOMContentLoaded', () => {
         sortAndDisplayPokemon(searchInput.value.trim());
     });
 
-    // Cargar la lista inicial de Pokémon
-    loadInitialPokemon();
 });

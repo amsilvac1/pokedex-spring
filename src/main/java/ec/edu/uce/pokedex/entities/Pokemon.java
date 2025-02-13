@@ -1,5 +1,6 @@
 package ec.edu.uce.pokedex.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,9 +24,11 @@ public class Pokemon {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "pokemon_id")
+    @JsonManagedReference
     private List<Abilities> abilities;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "pokemon_id")
+    @JsonManagedReference
     private List<Type> types;}
 

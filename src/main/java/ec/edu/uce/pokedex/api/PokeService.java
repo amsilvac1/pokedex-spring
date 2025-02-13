@@ -88,7 +88,7 @@ public class PokeService {
         pokemon.setWeight(pokemonJson.getDouble("weight"));
 
         // Manejar potencial null en 'front_default'
-        JSONObject sprites = pokemonJson.getJSONObject("sprites");
+        JSONObject sprites = pokemonJson.getJSONObject("sprites").getJSONObject("other").getJSONObject("official-artwork");
         String frontDefault = sprites.isNull("front_default") ? null : sprites.getString("front_default");
         pokemon.setImage(frontDefault);
 
